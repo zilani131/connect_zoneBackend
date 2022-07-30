@@ -21,11 +21,38 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run(){
     try{
      await client.connect();
+     //..........newsfeed posts database.............//
      const newsCollection=client.db("connectzone").collection("posts");
+     //.........users database collection............//
+     const usersCollection=client.db("connectzone").collection("users");
+     //..........get api for newsfeed posts.........//
      app.get('/posts',async(req,res)=>{
      const query={};
-     const news =await newsCollection.find(query).toArray();
-     res.send(news);
+     const posts =await newsCollection.find(query).toArray();
+     res.send(posts);
+
+     })
+
+     //..........................post api for news feed post...............//
+     app.post('/post',async(req,res)=>{
+      const post=req.body;
+      const result=await newsCollection.insertOne(post);
+      res.send(result);
+
+     })
+     //...................get api for users...........//
+     app.get('/users',async(req,res)=>{
+         const query={};
+         const users=await usersCollection.find(query).toArray();
+         res.send(users)
+
+
+     })
+     //................post api for user....//
+     app.post('/user',async(req,res)=>{
+          const user=req.body;
+          const result=await usersCollection.insertOne(user);
+          res.send(result);
 
      })
     }
