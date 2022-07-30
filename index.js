@@ -21,8 +21,8 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run(){
     try{
      await client.connect();
-     const newsCollection=client.db("connectzone").collection("news");
-     app.get('/news',async(req,res)=>{
+     const newsCollection=client.db("connectzone").collection("posts");
+     app.get('/posts',async(req,res)=>{
      const query={};
      const news =await newsCollection.find(query).toArray();
      res.send(news);
