@@ -32,6 +32,10 @@ async function run() {
     const commentsCollection = client.db("connectzone").collection("comments");
     // likes collection
     const likesCollection = client.db("connectzone").collection("likes");
+    // Friends Request collection
+    const friendRequestCollection = client
+      .db("connectzone")
+      .collection("friendRequests");
 
     //..........get api for newsfeed posts.........//
     app.get("/posts", async (req, res) => {
@@ -46,12 +50,23 @@ async function run() {
       const result = await postsCollection.insertOne(post);
       res.send(result);
     });
-    // get post by id
-    app.get("/post/:id", async (req, res) => {
-      const id = req.params.id;
-      const post = await postsCollection.findOne({ _id: ObjectId(id) });
-      res.send(post);
+    // get posts by email
+    app.get("/posts/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { userEmail: email };
+      const posts = await postsCollection.find(query).toArray();
+      res.send(posts);
     });
+    // get posts by friends array 
+    app.get("/postsByFriends/:friends", async (req, res) => {
+      const friends = req.params.friends;
+      const friendsArray = friends.split(",");
+      const query = { userEmail: { $in: friendsArray } };
+      const posts = await postsCollection.find(query).toArray();
+      res.send(posts);
+    })
+
+
     //...................get api for users...........//
     app.get("/users", async (req, res) => {
       const query = {};
@@ -73,6 +88,7 @@ async function run() {
     });
 
 
+
     //get all comments
     app.get("/comments", async (req, res) => {
       const comments = await commentsCollection.find({}).toArray();
@@ -92,23 +108,62 @@ async function run() {
       res.send(comments);
     });
 
-    //update likes count by post id
-    app.put("/like/:id", async (req, res) => {
-      const filter = { _id: ObjectId(req.params.id) };
-      const options = { upsert: true };
-      const updateDoc = {
-        $set: {
-          postLikes: req.body,
-        },
-      };
-      const result = await postsCollection.updateOne(
-        filter,
-        updateDoc,
-        options
-      );
+
+    // post a request to add friend
+    app.post("/friendRequest", async (req, res) => {
+      const request = req.body;
+      const result = await friendRequestCollection.insertOne(request);
       res.send(result);
     });
-    
+    // check is this user already sent request to this user
+    app.get("/friendRequest/:senderEmail/:receiverEmail", async (req, res) => {
+      const senderEmail = req.params.senderEmail;
+      const receiverEmail = req.params.receiverEmail;
+      const query = {
+        senderEmail: senderEmail,
+        receiverEmail: receiverEmail,
+      };
+      const find = await friendRequestCollection.findOne(query);
+      res.send(find);
+    });
+    //get all requests
+    app.get("/friendRequests", async (req, res) => {
+      const requests = await friendRequestCollection.find({}).toArray();
+      res.send(requests);
+    })
+    //get requests by receiver email
+    app.get("/friendRequests/:receiverEmail", async (req, res) => {
+      const receiverEmail = req.params.receiverEmail;
+      const query = { receiverEmail: receiverEmail };
+      const requests = await friendRequestCollection.find(query).toArray();
+      res.send(requests);
+    })
+    // delete friend request
+    app.delete("/acceptFriendRequest/:senderEmail/:receiverEmail", async (req, res) => {
+      const senderEmail = req.params.senderEmail;
+      const receiverEmail = req.params.receiverEmail;
+      const query = {
+        senderEmail: senderEmail,
+        receiverEmail: receiverEmail,
+      };
+      const result = await friendRequestCollection.deleteOne(query);
+      res.send(result);
+    })
+    // push an email to friends array
+    app.put("/pushFriend/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const updateDoc = {
+        $set:  req.body,
+      };
+      const result = await usersCollection.updateOne(
+        query,
+        updateDoc
+      );
+      res.send(result);
+    })
+
+
   } finally {
   }
 }
