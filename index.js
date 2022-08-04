@@ -33,9 +33,7 @@ async function run() {
     // likes collection
     const likesCollection = client.db("connectzone").collection("likes");
     // Friends Request collection
-    const friendRequestCollection = client
-      .db("connectzone")
-      .collection("friendRequests");
+    const friendRequestCollection = client.db("connectzone").collection("friendRequests");
 
     //..........get api for newsfeed posts.........//
     app.get("/posts", async (req, res) => {
