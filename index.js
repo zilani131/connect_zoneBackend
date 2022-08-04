@@ -1,9 +1,9 @@
 //user: connectzone
 //password: nLvAgmiHEoo6mhnT;
 
-const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
-const express = require("express");
-const cors = require("cors");
+import { MongoClient, ServerApiVersion } from "mongodb";
+import express, { json } from 'express';
+import cors from 'cors';
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -203,7 +203,7 @@ async function run() {
 }
 run().catch(console.dir);
 app.use(cors());
-app.use(express.json()); //middleware
+app.use(json()); //middleware
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
