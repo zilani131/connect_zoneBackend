@@ -65,6 +65,23 @@ async function run() {
       const posts = await postsCollection.find(query).toArray();
       res.send(posts);
     })
+    //update all posts userImage
+    app.put("/updatePostUserImage/:email", async (req, res) => {
+      const email = req.params.email;
+      const filter = { userEmail: email };
+      const updateDoc = { $set: { userImage: req.body.userImage } };
+      const result = await postsCollection.updateMany(filter, updateDoc);
+      res.send(result);
+    })
+    //update all posts userName
+    app.put("/updatePostUserName/:email", async (req, res) => {
+      const email = req.params.email;
+      const filter = { userEmail: email };
+      const updateDoc = { $set: { userName: req.body.userName } };
+      const result = await postsCollection.updateMany(filter, updateDoc);
+      res.send(result);
+    })
+
 
 
     //...................get api for users...........//
@@ -86,6 +103,15 @@ async function run() {
       const find = await usersCollection.findOne(query);
       res.json(find);
     });
+    //update user by email
+    app.put("/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const user = req.body;
+      const result = await usersCollection.updateOne(query, { $set: user });
+      res.send(result);
+    })
+
 
 
 
@@ -160,6 +186,14 @@ async function run() {
         query,
         updateDoc
       );
+      res.send(result);
+    })
+
+
+
+    //delete all posts
+    app.delete("/deletePosts", async (req, res) => {
+      const result = await postsCollection.deleteMany({});
       res.send(result);
     })
 
