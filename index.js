@@ -30,12 +30,12 @@ async function run() {
     const usersCollection = client.db("connectzone").collection("users");
     // comments collection
     const commentsCollection = client.db("connectzone").collection("comments");
+    //groups collection
+    const groupsCollection = client.db("connectzone").collection("groups");
     // likes collection
     const likesCollection = client.db("connectzone").collection("likes");
     // Friends Request collection
-    const friendRequestCollection = client
-      .db("connectzone")
-      .collection("friendRequests");
+    const friendRequestCollection = client.db("connectzone").collection("friendRequests");
 
     //..........get api for newsfeed posts.........//
     app.get("/posts", async (req, res) => {
@@ -111,9 +111,66 @@ async function run() {
       const result = await usersCollection.updateOne(query, { $set: user });
       res.send(result);
     })
+    // show user all friends by friends array
+    app.get("/user/:email/friends", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const find = await usersCollection.findOne(query);
+      const friends = find.friends;
+      const query2 = { email: { $in: friends } };
+      const users = await usersCollection.find(query2).toArray();
+      res.send(users);
+    }),
 
 
 
+    //post a group
+    app.post("/group", async (req, res) => {
+      const group = req.body;
+      const result = await groupsCollection.insertOne(group);
+      res.send(result);
+    })
+    // get group by creatorEmail
+    app.get("/groups/:creatorEmail", async (req, res) => {
+      const creatorEmail = req.params.creatorEmail;
+      const query = { groupCreatorEmail: creatorEmail };
+      const groups = await groupsCollection.find(query).toArray();
+      res.send(groups);
+    })
+    // get all groups
+    app.get("/groups", async (req, res) => {
+      const query = {};
+      const groups = await groupsCollection.find(query).toArray();
+      res.send(groups);
+    })
+    //get single group by groupSlug
+    app.get("/groupBySlug/:groupSlug", async (req, res) => {
+      const groupSlug = req.params.groupSlug;
+      const query = { groupSlug: groupSlug };
+      const group = await groupsCollection.findOne(query);
+      res.send(group);
+    })
+    //post to group
+    app.post("/group/:groupSlug", async (req, res) => {
+      const groupSlug = req.params.groupSlug;
+      const query = { groupSlug: groupSlug };
+      const group = await groupsCollection.findOne(query);
+      const post = req.body;
+      group.groupPosts.push(post);
+      const result = await groupsCollection.updateOne(query, { $set: group });
+      res.send(result);
+    })
+    //get group posts by groupSlug
+    app.get("/group/:groupSlug/posts", async (req, res) => {
+      const groupSlug = req.params.groupSlug;
+      const query = { groupSlug: groupSlug };
+      const group = await groupsCollection.findOne(query);
+      res.send(group.groupPosts);
+    }),
+
+
+
+    
 
     //get all comments
     app.get("/comments", async (req, res) => {
@@ -186,14 +243,6 @@ async function run() {
         query,
         updateDoc
       );
-      res.send(result);
-    })
-
-
-
-    //delete all posts
-    app.delete("/deletePosts", async (req, res) => {
-      const result = await postsCollection.deleteMany({});
       res.send(result);
     })
 
