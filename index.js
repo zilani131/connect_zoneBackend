@@ -16,11 +16,11 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
 });
-/*client.connect(err => {
+client.connect(err => {
   const collection = client.db("test").collection("devices");
   console.log("zilani");
   client.close();
-});*/
+});
 async function run() {
   try {
     await client.connect();
@@ -191,6 +191,33 @@ async function run() {
       res.send(comments);
     });
 
+// -----------------------------------
+
+
+
+//  
+
+// get all like
+app.get("/like", async (req, res) => {
+  const like = await likesCollection.find({}).toArray();
+  res.send(like);
+});
+
+ // count of like api create
+ app.post("/countLike",async(req,res)=>{
+  const like = req.body;
+  const result = await likesCollection.insertOne(like);
+  res.send(result);
+})
+
+app.get("/like/:id", async (req, res) => {
+  const id = req.params.id;
+  const query = { postId: id };
+  const like = await likesCollection.find(query).toArray();
+  res.send(like);
+});
+
+
 
     // post a request to add friend
     app.post("/friendRequest", async (req, res) => {
@@ -246,10 +273,7 @@ async function run() {
       res.send(result);
     })
 
-    // count of like api create
-    app.put("/countLike",async(req,res)=>{
-      
-    })
+   
 
 
   } finally {
