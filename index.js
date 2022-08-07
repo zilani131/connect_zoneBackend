@@ -122,7 +122,7 @@ async function run() {
       res.send(users);
     }),
 
-
+  
 
     //post a group
     app.post("/group", async (req, res) => {
@@ -244,6 +244,11 @@ async function run() {
         updateDoc
       );
       res.send(result);
+    })
+
+    // count of like api create
+    app.put("/countLike",async(req,res)=>{
+      
     })
 
 
